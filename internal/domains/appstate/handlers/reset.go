@@ -167,11 +167,6 @@ func (h *ResetStateHandler) reset(ctx context.Context, tx *activity.Transaction)
 		return fmt.Errorf("reset: %w", err)
 	}
 
-	// stop bgp adapter
-	if err = h.systemdService.TryStopServiceWithTx(tx, constants.AdapterServiceName); err != nil {
-		return fmt.Errorf("reset: %w", err)
-	}
-
 	// stop update manager
 	if err = h.systemdService.TryStopServiceWithTx(tx, constants.UpdateManagerServiceName); err != nil {
 		return fmt.Errorf("reset: %w", err)
@@ -245,11 +240,6 @@ func (h *ResetStateHandler) resetHub(ctx context.Context, tx *activity.Transacti
 	resetConfig := config.EmptyConfig()
 	resetConfig.Port = oldCfg.Port
 	if err = h.configService.UpdateConfigWithTx(ctx, tx, resetConfig); err != nil {
-		return fmt.Errorf("reset: %w", err)
-	}
-
-	// stop bgp adapter
-	if err = h.systemdService.TryStopServiceWithTx(tx, constants.AdapterServiceName); err != nil {
 		return fmt.Errorf("reset: %w", err)
 	}
 

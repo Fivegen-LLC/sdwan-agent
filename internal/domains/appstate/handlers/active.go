@@ -190,25 +190,6 @@ func (h *ActiveStateHandler) runFirstSetup(ctx context.Context, tx *activity.Tra
 		return fmt.Errorf("runFirstSetup: %w", err)
 	}
 
-	// activate bgp adapter
-	if err = h.activityService.ExecuteActivity(ctx, tx, actcmd.ActivityExecCommand, "enable bgp adapter",
-		actcmd.NewExecCommandPayload(
-			commands.NewEnableServiceCmd(constants.AdapterServiceName).String(),
-			commands.NewDisableServiceCmd(constants.AdapterServiceName).String(),
-		),
-	); err != nil {
-		return fmt.Errorf("runFirstSetup: %w", err)
-	}
-
-	if err = h.activityService.ExecuteActivity(ctx, tx, actcmd.ActivityExecCommand, "start bgp adapter",
-		actcmd.NewExecCommandPayload(
-			commands.NewStartServiceCmd(constants.AdapterServiceName).String(),
-			commands.NewStopServiceCmd(constants.AdapterServiceName).String(),
-		),
-	); err != nil {
-		return fmt.Errorf("runFirstSetup: %w", err)
-	}
-
 	// activate update manager
 	if err = h.activityService.ExecuteActivity(ctx, tx, actcmd.ActivityExecCommand, "enable update manager",
 		actcmd.NewExecCommandPayload(
@@ -389,11 +370,6 @@ func (h *ActiveStateHandler) unsubscribeQueueSubjects(tx *activity.Transaction) 
 }
 
 func (h *ActiveStateHandler) activateServices(tx *activity.Transaction) (err error) {
-	// activate bgp adapter
-	if err = h.systemdService.TryStartServiceWithTx(tx, constants.AdapterServiceName); err != nil {
-		return fmt.Errorf("activateServices: %w", err)
-	}
-
 	// activate update manager
 	if err = h.systemdService.TryStartServiceWithTx(tx, constants.UpdateManagerServiceName); err != nil {
 		return fmt.Errorf("activateServices: %w", err)

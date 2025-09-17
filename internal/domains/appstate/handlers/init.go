@@ -239,21 +239,6 @@ func (h *InitStateHandler) restoreInitState(tx *activity.Transaction) (err error
 	}
 
 	// activate/deactivate daemons
-	// bgp adapter
-	if cmdErr := h.shellService.Exec(commands.NewDisableServiceCmd(constants.AdapterServiceName)); cmdErr != nil {
-		log.Error().
-			Err(cmdErr).
-			Str("service name", constants.AdapterServiceName).
-			Msg("restoreInitState: disable service error")
-	}
-
-	if cmdErr := h.shellService.Exec(commands.NewStopServiceCmd(constants.AdapterServiceName)); cmdErr != nil {
-		log.Error().
-			Err(cmdErr).
-			Str("service name", constants.AdapterServiceName).
-			Msg("restoreInitState: stop service error")
-	}
-
 	// update manager
 	if cmdErr := h.shellService.Exec(commands.NewDisableServiceCmd(constants.UpdateManagerServiceName)); cmdErr != nil {
 		log.Error().
