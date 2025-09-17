@@ -38,8 +38,8 @@ cloud.google.com/go/storage v1.14.0/go.mod h1:GrKmX003DSIwi9o29oFT7YDnHYwZoctc3f
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/Fivegen-LLC/sdwan-lib v0.0.0-20250917130513-260664dc9012 h1:1+gB103K1WXU437P8xZNgPOvQCRkus0aBtj4u++t3KU=
-github.com/Fivegen-LLC/sdwan-lib v0.0.0-20250917130513-260664dc9012/go.mod h1:ltP+pHMGXkP2v/G5M9G/zOK9UMfIUo7Vcw0DIKYk1Sk=
+github.com/Fivegen-LLC/sdwan-lib v0.0.0-20250917141213-454c671eabe1 h1:HI2bNXvCww85xVmrnHCZ5WZZ6q+WsLcfubDCJ7n901w=
+github.com/Fivegen-LLC/sdwan-lib v0.0.0-20250917141213-454c671eabe1/go.mod h1:ltP+pHMGXkP2v/G5M9G/zOK9UMfIUo7Vcw0DIKYk1Sk=
 github.com/brunoga/deep v1.2.4 h1:Aj9E9oUbE+ccbyh35VC/NHlzzjfIVU69BXu2mt2LmL8=
 github.com/brunoga/deep v1.2.4/go.mod h1:GDV6dnXqn80ezsLSZ5Wlv1PdKAWAO4L5PnKYtv2dgaI=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=

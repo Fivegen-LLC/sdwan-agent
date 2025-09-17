@@ -3,7 +3,7 @@ module github.com/Fivegen-LLC/sdwan-agent
 go 1.24.3
 
 require (
-	github.com/Fivegen-LLC/sdwan-lib v0.0.0-20250917130513-260664dc9012
+	github.com/Fivegen-LLC/sdwan-lib v0.0.0-20250917141213-454c671eabe1
 	github.com/dgraph-io/badger/v4 v4.5.1
 	github.com/go-playground/validator/v10 v10.15.5
 	github.com/go-resty/resty/v2 v2.16.5
