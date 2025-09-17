@@ -1,0 +1,9 @@
+/bin
+/.idea
+/vendor
+_build
+debian/.debhelper
+debian/sdwan-agent
+
+/results/
+report.xml

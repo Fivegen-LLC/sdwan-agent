@@ -1,0 +1,11 @@
+dir: "{{.InterfaceDir}}/{{.SrcPackageName}}_mocks"
+filename: "{{.SrcPackageName}}_mocks.go"
+pkgname: "{{.SrcPackageName}}_mocks"
+all: True
+packages:
+  github.com/Fivegen-LLC/sdwan-agent/internal/domains/discovery:
+    config:
+      recursive: true
+  github.com/Fivegen-LLC/sdwan-agent/internal/domains/nslookup:
+    config:
+      recursive: true
