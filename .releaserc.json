@@ -1,0 +1,93 @@
+{
+  "branches": ["main", "master", { "name": "release", "channel": "release" }],
+  "tagFormat": "${version}",
+  "plugins": [
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        "preset": "conventionalcommits",
+        "releaseRules": [
+          { "type": "docs", "release": "patch" },
+          { "type": "refactor", "release": "patch" },
+          { "type": "style", "release": "patch" },
+          { "type": "chore", "release": "patch" },
+          { "type": "ci", "release": "patch" },
+          { "type": "test", "release": "patch" },
+          { "type": "build", "release": "patch" },
+          { "type": "perf", "release": "patch" },
+          { "type": "breaking", "release": "major" },
+          { "type": "break", "release": "major" },
+          { "type": "feat", "release": "minor" },
+          { "type": "fix", "release": "patch" },
+          { "type": "revert", "release": "patch" }
+        ],
+        "parserOpts": {
+          "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES", "BREAKING", "MAJOR"]
+        }
+      }
+    ],
+    [
+      "@semantic-release/release-notes-generator",
+      {
+        "preset": "conventionalcommits",
+        "presetConfig": {
+          "types": [
+            { "type": "feat", "section": "✨ Features" },
+            { "type": "fix", "section": "🐞 Bug Fixes" },
+            { "type": "breaking", "section": "💣 Breaking Changes" },
+            { "type": "perf", "section": "⚡️ Performance Improvements" },
+            { "type": "revert", "section": "⏪ Reverts" },
+            { "type": "docs", "section": "📖 Documentation" },
+            { "type": "style", "section": "🎨 Styles" },
+            { "type": "chore", "section": "🛠️ Miscellaneous Chores" },
+            { "type": "refactor", "section": "♻️ Code Refactoring" },
+            { "type": "test", "section": "✅ Tests", "hidden": true },
+            { "type": "build", "section": "🏗️ Build System", "hidden": true },
+            { "type": "ci", "section": "🤖 Continuous Integration", "hidden": true }
+          ]
+        },
+        "parserOpts": {
+          "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES", "BREAKING"]
+        },
+        "writerOpts": {
+          "commitsSort": ["subject", "scope"]
+        }
+      }
+    ],
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md",
+        "changelogTitle": "# Changelog\n\nAll notable changes to this project will be documented in this file. See\n[Conventional Commits](https://conventionalcommits.org) for commit guidelines."
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "echo ${nextRelease.version} > .version && echo SEMVER=${nextRelease.version} > version_pipe.env",
+        "publishCmd": "echo publish: CI worker release v${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": ["CHANGELOG.md", ".version"]
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          { "path": ".version", "label": "Version File" },
+          { "path": "CHANGELOG.md", "label": "CHANGELOG.md" },
+          "dist/release/*"
+        ],
+        "addReleases": "bottom",
+        "successComment": false,
+        "failComment": false
+      }
+    ]
+  ]
+}
+
+
