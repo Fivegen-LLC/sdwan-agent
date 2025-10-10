@@ -15,7 +15,7 @@ contents:
     dst: /opt/sdwan-agent/${BINARY_NAME}
     expand: true
 
-  - src: agent-starter.env
+  - src: agent.env
     dst: /etc/sdwan/agent.env
     type: config
     file_info:
