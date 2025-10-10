@@ -1,0 +1,43 @@
+name: "sdwan-agent"
+arch: ${ARCH}
+platform: "linux"
+version: ${SEMVER}
+section: "sd-wan"
+priority: "optional"
+maintainer: "Ruslan Malinovsky <rm@fivegen.ru>"
+description: |
+  SD-WAN agent
+vendor: "Fivegen"
+homepage: "https://fivegen.ru"
+license: "Private"
+contents:
+  - src: ${ARTIFACTS_DIR}/${BINARY_NAME}
+    dst: /opt/sdwan-agent/${BINARY_NAME}
+    expand: true
+
+  - src: agent-starter.env
+    dst: /etc/sdwan/agent.env
+    type: config
+    file_info:
+      mode: 0644
+      owner: root
+      group: root
+
+  - src: ./packaging/sdwan-agent.service
+    dst: /lib/systemd/system/sdwan-agent.service
+    type: config
+    file_info:
+      mode: 0644
+      owner: root
+      group: root
+
+umask: 0o002
+
+scripts:
+  preinstall: ./packaging/sdwan-agent.preinst
+
+overrides:
+  deb:
+    depends:
+      - wireguard
+      - openvswitch-switch

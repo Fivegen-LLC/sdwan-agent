@@ -1,0 +1,201 @@
+name: Semantic Release
+
+on:
+  push:
+    branches: ["main", "master"]
+
+permissions:
+  contents: write
+
+env:
+  APP_NAME: ${{ github.event.repository.name }}
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+      - name: Configure access to private modules
+        env:
+          GH_READ_TOKEN: ${{ secrets.GH_READ_TOKEN }}
+        run: |
+          set -euxo pipefail
+          echo "machine github.com login ${GITHUB_ACTOR} password ${GH_READ_TOKEN}" > ~/.netrc
+          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+          git config --global url."https://${GITHUB_ACTOR}:${GH_READ_TOKEN}@github.com/".insteadOf "https://github.com/"
+          echo "GOPRIVATE=github.com/Fivegen-LLC/*" >> $GITHUB_ENV
+      - name: Download modules
+        run: |
+          set -euxo pipefail
+          go mod download
+      - name: Run tests
+        run: |
+          set -euxo pipefail
+          mkdir -p dist/coverage
+          go test ./... -covermode=count -coverprofile=dist/coverage/coverage.out
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: dist/coverage/**
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [test]
+    outputs:
+      version: ${{ steps.getver.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install semantic-release deps
+        run: |
+          set -euxo pipefail
+          npm --version
+          npm init -y >/dev/null 2>&1 || true
+          npm install --save-dev semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/exec @semantic-release/github conventional-changelog-conventionalcommits
+      - name: Run semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
+      - name: Export release version
+        id: getver
+        run: |
+          set -euxo pipefail
+          if [ -f .version ]; then
+            VER=$(cat .version | tr -d '\n')
+            echo "version=$VER" >> $GITHUB_OUTPUT
+          else
+            echo "version=" >> $GITHUB_OUTPUT
+          fi
+
+  build-packages:
+    name: build deb packages
+    runs-on: ubuntu-latest
+    needs: [release]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+      - name: Configure access to private modules
+        env:
+          GH_READ_TOKEN: ${{ secrets.GH_READ_TOKEN }}
+        run: |
+          set -euxo pipefail
+          echo "machine github.com login ${GITHUB_ACTOR} password ${GH_READ_TOKEN}" > ~/.netrc
+          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+          git config --global url."https://${GITHUB_ACTOR}:${GH_READ_TOKEN}@github.com/".insteadOf "https://github.com/"
+          echo "GOPRIVATE=github.com/Fivegen-LLC/*" >> $GITHUB_ENV
+      - name: Build linux/amd64
+        run: |
+          set -euxo pipefail
+          mkdir -p dist/bin/amd64
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o dist/bin/amd64/${APP_NAME} ./cmd/app
+      - name: Build linux/arm64
+        run: |
+          set -euxo pipefail
+          mkdir -p dist/bin/arm64
+          GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o dist/bin/arm64/${APP_NAME} ./cmd/app
+      - name: Install nfpm
+        run: |
+          set -euxo pipefail
+          curl -sSL https://github.com/goreleaser/nfpm/releases/download/v2.41.2/nfpm_2.41.2_Linux_x86_64.tar.gz | sudo tar -xz -C /usr/local/bin nfpm
+          nfpm --version
+      - name: Package linux/amd64
+        env:
+          ARCH: amd64
+          PACKAGER: deb
+          NFPM_YAML: nfpm.yaml
+          SEMVER: ${{ needs.release.outputs.version }}
+          BINARY_NAME: ${{ env.APP_NAME }}
+          ARTIFACTS_DIR: dist/bin/amd64
+        run: |
+          set -euxo pipefail
+          mkdir -p results
+          echo "$SEMVER" > .version
+          /usr/local/bin/nfpm pkg --packager "$PACKAGER" --config "$NFPM_YAML" --target results
+      - name: Package linux/arm64
+        env:
+          ARCH: arm64
+          PACKAGER: deb
+          NFPM_YAML: nfpm.yaml
+          SEMVER: ${{ needs.release.outputs.version }}
+          BINARY_NAME: ${{ env.APP_NAME }}
+          ARTIFACTS_DIR: dist/bin/arm64
+        run: |
+          set -euxo pipefail
+          mkdir -p results
+          echo "$SEMVER" > .version
+          /usr/local/bin/nfpm pkg --packager "$PACKAGER" --config "$NFPM_YAML" --target results
+      - name: Upload raw binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries
+          path: |
+            dist/bin/amd64/${{ env.APP_NAME }}
+            dist/bin/arm64/${{ env.APP_NAME }}
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-packages
+          path: results/*.deb
+
+  attach-packages:
+    name: attach packages to release
+    runs-on: ubuntu-latest
+    needs: [build-packages, release]
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v4
+        with:
+          name: deb-packages
+          path: dist/release
+      - name: Download binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries
+          path: dist/release
+      - name: Prepare renamed binaries
+        run: |
+          set -euxo pipefail
+          # Ensure target dir exists
+          mkdir -p dist/release
+          # Discover binary paths inside downloaded artifact and rename with arch suffixes
+          AMD64_BIN=$(find dist/release -type f -path "*/amd64/${APP_NAME}" -print -quit || true)
+          ARM64_BIN=$(find dist/release -type f -path "*/arm64/${APP_NAME}" -print -quit || true)
+          if [ -n "${AMD64_BIN}" ]; then
+            cp "${AMD64_BIN}" dist/release/${APP_NAME}_linux_amd64
+          fi
+          if [ -n "${ARM64_BIN}" ]; then
+            cp "${ARM64_BIN}" dist/release/${APP_NAME}_linux_arm64
+          fi
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.release.outputs.version }}
+          files: |
+            dist/release/*.deb
+            dist/release/${{ env.APP_NAME }}_linux_amd64
+            dist/release/${{ env.APP_NAME }}_linux_arm64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

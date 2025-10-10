@@ -1,0 +1,15 @@
+[Unit]
+Description=SD-WAN agent service
+After=network.target net_init.service nats-server.service
+Wants=net_init.service nats-server.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+EnvironmentFile=/etc/sdwan/agent.env
+EnvironmentFile=/etc/environment
+ExecStart=/opt/sdwan-agent/sdwan-agent
+
+[Install]
+WantedBy=multi-user.target

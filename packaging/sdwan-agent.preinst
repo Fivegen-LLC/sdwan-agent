@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+case "$1" in
+    install|upgrade|abort-upgrade)
+        [ ! -d /var/log/sdwan ] && mkdir -p /var/log/sdwan; chmod 755 /var/log/sdwan;
+        [ ! -f /var/log/sdwan/sdwan_agent.log ] && touch /var/log/sdwan/sdwan_agent.log; chmod 644 /var/log/sdwan/sdwan_agent.log;
+        ;;
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 0
+        ;;
+esac

@@ -1,0 +1,48 @@
+name: PR Test
+
+on:
+  pull_request:
+    branches: ["main", "master"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+      - name: Configure access to private modules
+        env:
+          GH_READ_TOKEN: ${{ secrets.GH_READ_TOKEN }}
+        run: |
+          set -euxo pipefail
+          echo "machine github.com login ${GITHUB_ACTOR} password ${GH_READ_TOKEN}" > ~/.netrc
+          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+          git config --global url."https://${GITHUB_ACTOR}:${GH_READ_TOKEN}@github.com/".insteadOf "https://github.com/"
+          echo "GOPRIVATE=github.com/Fivegen-LLC/*" >> $GITHUB_ENV
+      - name: Download modules
+        run: |
+          set -euxo pipefail
+          go mod download
+      - name: Run tests
+        run: |
+          set -euxo pipefail
+          mkdir -p dist/coverage
+          go test ./... -covermode=count -coverprofile=dist/coverage/coverage.out
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: dist/coverage/**
+
+
