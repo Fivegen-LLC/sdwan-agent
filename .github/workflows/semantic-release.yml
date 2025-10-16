@@ -199,6 +199,9 @@ jobs:
           codename: ${{ env.CODENAME }}
           components: ${{ env.COMPONENTS }}
           architectures: ${{ env.ARCHITECTURES }}
+          override: |
+            sdwan-agent:
+              reprepro-options: --ignore=unknownfield
       - name: Upload Pages artifact
         id: upload-artifact
         uses: actions/upload-pages-artifact@v3
