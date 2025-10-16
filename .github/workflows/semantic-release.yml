@@ -183,6 +183,11 @@ jobs:
         with:
           name: deb-packages
           path: packages
+      - name: Install APT repository tools
+        run: |
+          set -euxo pipefail
+          sudo apt update
+          sudo apt install -y reprepro apt-mirror
       - name: Create APT repository
         id: create-apt-repo
         uses: morph027/apt-repo-action@v3.7
