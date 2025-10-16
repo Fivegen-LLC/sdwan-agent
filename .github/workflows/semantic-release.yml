@@ -199,10 +199,6 @@ jobs:
           codename: ${{ env.CODENAME }}
           components: ${{ env.COMPONENTS }}
           architectures: ${{ env.ARCHITECTURES }}
-          import-from-repo-url: |
-            deb-amd64 https://${{ github.repository_owner }}.github.io/${{ env.REPO_NAME }}/ ${{ env.CODENAME }} ${{ env.COMPONENTS }}
-            deb-arm64 https://${{ github.repository_owner }}.github.io/${{ env.REPO_NAME }}/ ${{ env.CODENAME }} ${{ env.COMPONENTS }}
-          import-from-repo-failure-allow: true
       - name: Upload Pages artifact
         id: upload-artifact
         uses: actions/upload-pages-artifact@v3
