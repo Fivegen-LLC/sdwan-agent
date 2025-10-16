@@ -168,7 +168,7 @@ jobs:
 
   create-apt-repo:
     name: create APT repository
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: [build-packages, release]
     outputs:
       artifact_id: ${{ steps.upload-artifact.outputs.artifact-id }}
@@ -178,6 +178,12 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v4
+      - name: Add reprepro multiple-versions repo
+        uses: myci-actions/add-deb-repo@11
+        with:
+          repo: https://packaging.gitlab.io/reprepro-multiple-versions
+          key-url: https://packaging.gitlab.io/reprepro-multiple-versions/gpg.key
+          suite: noble
       - name: Download packages
         uses: actions/download-artifact@v4
         with:
@@ -199,9 +205,6 @@ jobs:
           codename: ${{ env.CODENAME }}
           components: ${{ env.COMPONENTS }}
           architectures: ${{ env.ARCHITECTURES }}
-          override: |
-            sdwan-agent:
-              reprepro-options: --ignore=unknownfield
       - name: Upload Pages artifact
         id: upload-artifact
         uses: actions/upload-pages-artifact@v3
