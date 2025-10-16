@@ -11,7 +11,7 @@ permissions:
 
 env:
   APP_NAME: ${{ github.event.repository.name }}
-  REPO_NAME: sdwan
+  REPO_NAME: sdwan-agent
   CODENAME: jammy
   COMPONENTS: main
   ARCHITECTURES: amd64 arm64
