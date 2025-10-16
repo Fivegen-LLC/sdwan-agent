@@ -185,7 +185,7 @@ jobs:
           path: packages
       - name: Create APT repository
         id: create-apt-repo
-        uses: morph027/apt-repo-action@v2
+        uses: morph027/apt-repo-action@v3.7
         with:
           repo-name: ${{ env.REPO_NAME }}
           scan-dir: packages
